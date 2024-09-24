@@ -5,21 +5,19 @@ from pprint import pprint
 
 RAW_STATES = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
-
 class DDFA:
     def __init__(self, tree, symbols, regex):
-
-        # Useful for syntax tree
+        # Útil para el árbol de sintaxis
         self.nodes = list()
 
-        # FA properties
+        # Propiedades del autómata finito
         self.symbols = symbols
         self.states = list()
         self.trans_func = dict()
         self.accepting_states = set()
         self.initial_state = 'A'
 
-        # Class properties
+        # Propiedades de la clase
         self.tree = tree
         self.regex = regex
         self.augmented_state = None
@@ -31,11 +29,12 @@ class DDFA:
         except:
             pass
 
-        # Initialize dfa construction
+        # Inicializar la construcción del DFA
         self.ParseTree(self.tree)
         self.CalcFollowPos()
 
     def CalcFollowPos(self):
+        # Calcular followpos para cada nodo
         for node in self.nodes:
             if node.value == '*':
                 for i in node.lastpos:
@@ -46,43 +45,41 @@ class DDFA:
                     child_node = next(filter(lambda x: x._id == i, self.nodes))
                     child_node.followpos += node.c2.firstpos
 
-        # Initiate state generation
+        # Iniciar la generación de estados
         initial_state = self.nodes[-1].firstpos
 
-        # Filter the nodes that have a symbol
+        # Filtrar los nodos que tienen un símbolo
         self.nodes = list(filter(lambda x: x._id, self.nodes))
         self.augmented_state = self.nodes[-1]._id
 
-        # Recursion
+        # Recursión
         self.CalcNewStates(initial_state, next(self.STATES))
 
     def CalcNewStates(self, state, curr_state):
-
+        # Calcular nuevos estados
         if not self.states:
             self.states.append(set(state))
             if self.augmented_state in state:
                 self.accepting_states.update(curr_state)
 
-        # Iteramos por cada símbolo
+        # Iterar por cada símbolo
         for symbol in self.symbols:
-
-            # Get all the nodes with the same symbol in followpos
+            # Obtener todos los nodos con el mismo símbolo en followpos
             same_symbols = list(
                 filter(lambda x: x.value == symbol and x._id in state, self.nodes))
 
-            # Create a new state with the nodes
+            # Crear un nuevo estado con los nodos
             new_state = set()
             for node in same_symbols:
                 new_state.update(node.followpos)
 
-            # new state is not in the state list
+            # Si el nuevo estado no está en la lista de estados
             if new_state not in self.states and new_state:
-
-                # Get this new state's letter
+                # Obtener la letra de este nuevo estado
                 self.states.append(new_state)
                 next_state = next(self.STATES)
 
-                # Add state to transition function
+                # Agregar estado a la función de transición
                 try:
                     self.trans_func[next_state]
                 except:
@@ -94,26 +91,25 @@ class DDFA:
                     self.trans_func[curr_state] = dict()
                     existing_states = self.trans_func[curr_state]
 
-                # Add the reference
+                # Agregar la referencia
                 existing_states[symbol] = next_state
                 self.trans_func[curr_state] = existing_states
 
-                # Is it an acceptina_state?
+                # ¿Es un estado de aceptación?
                 if self.augmented_state in new_state:
                     self.accepting_states.update(next_state)
 
-                # Repeat with this new state
+                # Repetir con este nuevo estado
                 self.CalcNewStates(new_state, next_state)
 
             elif new_state:
-                # State already exists... which one is it?
+                # El estado ya existe... ¿cuál es?
                 for i in range(0, len(self.states)):
-
                     if self.states[i] == new_state:
                         state_ref = RAW_STATES[i]
                         break
 
-                # Add the symbol transition
+                # Agregar la transición del símbolo
                 try:
                     existing_states = self.trans_func[curr_state]
                 except:
@@ -124,17 +120,20 @@ class DDFA:
                 self.trans_func[curr_state] = existing_states
 
     def ParseTree(self, node):
+        # Parsear el árbol de sintaxis
         method_name = node.__class__.__name__ + 'Node'
         method = getattr(self, method_name)
         return method(node)
 
     def LetterNode(self, node):
+        # Procesar nodo de letra
         new_node = Node(self.iter, [self.iter], [
                         self.iter], value=node.value, nullable=False)
         self.nodes.append(new_node)
         return new_node
 
     def OrNode(self, node):
+        # Procesar nodo OR
         node_a = self.ParseTree(node.a)
         self.iter += 1
         node_b = self.ParseTree(node.b)
@@ -148,6 +147,7 @@ class DDFA:
         return Node(None, firstpos, lastpos, is_nullable, '|', node_a, node_b)
 
     def AppendNode(self, node):
+        # Procesar nodo de concatenación
         node_a = self.ParseTree(node.a)
         self.iter += 1
         node_b = self.ParseTree(node.b)
@@ -169,6 +169,7 @@ class DDFA:
         return Node(None, firstpos, lastpos, is_nullable, '.', node_a, node_b)
 
     def KleeneNode(self, node):
+        # Procesar nodo de estrella de Kleene
         node_a = self.ParseTree(node.a)
         firstpos = node_a.firstpos
         lastpos = node_a.lastpos
@@ -176,6 +177,7 @@ class DDFA:
         return Node(None, firstpos, lastpos, True, '*', node_a)
 
     def PlusNode(self, node):
+        # Procesar nodo de más
         node_a = self.ParseTree(node.a)
 
         self.iter += 1
@@ -199,7 +201,8 @@ class DDFA:
         return Node(None, firstpos, lastpos, is_nullable, '.', node_a, node_b)
 
     def QuestionNode(self, node):
-        # Node_a is epsilon
+        # Procesar nodo de interrogación
+        # Node_a es epsilon
         node_a = Node(None, list(), list(), True)
         self.iter += 1
         node_b = self.ParseTree(node.a)
@@ -213,9 +216,9 @@ class DDFA:
         return Node(None, firstpos, lastpos, is_nullable, '|', node_a, node_b)
 
     def EvalRegex(self):
+        # Evaluar la expresión regular
         curr_state = 'A'
         for symbol in self.regex:
-
             if not symbol in self.symbols:
                 return 'No'
 
@@ -230,6 +233,7 @@ class DDFA:
         return 'Yes' if curr_state in self.accepting_states else 'No'
 
     def GraphDFA(self):
+        # Graficar el DFA
         states = set(self.trans_func.keys())
         alphabet = set(self.symbols)
 
@@ -242,7 +246,6 @@ class DDFA:
         source = graph.source
         WriteToFile('./output/DirectDFA.gv', source)
         graph.render('./output/DirectDFA.gv', format='pdf', view=True)
-
 
 class Node:
     def __init__(self, _id, firstpos=None, lastpos=None, nullable=False, value=None, c1=None, c2=None):

@@ -1,23 +1,25 @@
-from .tokens import Token, TokenType
+from tokens import Token, TokenType
 
 LETTERS = 'abcdefghijklmnopqrstuvwxyz01234567890.'
-
 
 class DirectReader:
 
     def __init__(self, string: str):
+        # Inicializa el lector directo con una cadena de entrada
         self.string = iter(string.replace(' ', ''))
         self.input = set()
         self.rparPending = False
         self.Next()
 
     def Next(self):
+        # Avanza al siguiente carácter en la cadena de entrada
         try:
             self.curr_char = next(self.string)
         except StopIteration:
             self.curr_char = None
 
     def CreateTokens(self):
+        # Genera tokens a partir de la cadena de entrada
         while self.curr_char != None:
 
             if self.curr_char in LETTERS:
@@ -26,7 +28,7 @@ class DirectReader:
 
                 self.Next()
 
-                # Finally, check if we need to add an append token
+                # Finalmente, verifica si necesitamos agregar un token de concatenación
                 if self.curr_char != None and \
                         (self.curr_char in LETTERS or self.curr_char == '('):
                     yield Token(TokenType.APPEND, '.')
@@ -82,16 +84,17 @@ class DirectReader:
                     yield Token(TokenType.RPAR)
                     self.rparPending = False
 
-                # Finally, check if we need to add an append token
+                # Finalmente, verifica si necesitamos agregar un token de concatenación
                 if self.curr_char != None and \
                         (self.curr_char in LETTERS or self.curr_char == '('):
                     yield Token(TokenType.APPEND, '.')
 
             else:
-                raise Exception(f'Invalid entry: {self.curr_char}')
+                raise Exception(f'Entrada inválida: {self.curr_char}')
 
         yield Token(TokenType.APPEND, '.')
         yield Token(TokenType.LETTER, '#')
 
     def GetSymbols(self):
+        # Devuelve el conjunto de símbolos encontrados en la cadena de entrada
         return self.input
