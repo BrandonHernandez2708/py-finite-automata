@@ -5,6 +5,21 @@ from dfa import DFA
 from direct_dfa import DDFA
 from direct_reader import DirectReader
 from time import process_time
+import re
+
+# Función para guardar la expresión regular en un archivo
+def guardar_expresion(expresion_regular):
+    with open("expresiones_regulares.txt", "a") as archivo:
+        archivo.write("\nER:\n")
+        archivo.write(f"{expresion_regular}\n")
+    print("Expresión regular guardada en 'expresiones_regulares.txt'.")
+
+# Función para validar una cadena con una expresión regular
+def validar_cadena(expresion_regular, cadena):
+    try:
+        return re.fullmatch(expresion_regular, cadena) is not None
+    except re.error:
+        return False
 
 titulo_programa = '''
 
@@ -16,8 +31,12 @@ Genera NFA's o DFA's basados en una expresión regular y compara tiempos simulan
 menu_principal = '''
 ¿Qué te gustaría hacer?
 1. Establecer una expresión regular
-2. Probar una cadena con la expresión regular dada
-0. Salir del programa
+2. Generar  AFN
+3. Conversion AFD 
+4.Validacion de cadenas 
+5.Mostrar Gramatica
+6. Guardar 
+7. Salir del programa
 '''
 
 submenu = '''
@@ -54,6 +73,7 @@ if __name__ == "__main__":
         if opt == '1':
             print(mensaje_tipo_regex)
             regex = input('> ')
+            guardar_expresion(regex)  # Guardar la expresión regular
 
             try:
                 reader = Reader(regex)
@@ -74,7 +94,7 @@ if __name__ == "__main__":
             except Exception as e:
                 print(f'\n\tERR: {e}')
 
-        if opt == '2':
+        elif opt == '2':
             if not regex:
                 print('\n\tERR: ¡Necesitas establecer una expresión regular primero!')
                 opt = None
@@ -137,12 +157,31 @@ if __name__ == "__main__":
 
                     ddfa = None
 
-                elif metodo == '3':
+                if metodo == '4':
+
                     continue
 
                 else:
                     print(opcion_invalida)
 
-        elif opt == '0':
+        elif opt == '4':
+            if regex is None:
+                print("\nPrimero debes ingresar una expresión regular (opción 1).")
+                continue
+
+            while True:
+                # Pedir al usuario que ingrese una cadena para validar
+                cadena = input("\nIngresa una cadena para validar (o 'salir' para volver al menú): ")
+
+                if cadena.lower() == 'salir' or cadena =='$':
+                    break  # Volver al menú
+
+                # Validar la cadena con la expresión regular
+                if validar_cadena(regex, cadena):
+                    print(f"La cadena '{cadena}' es válida para la expresión regular.")
+                else:
+                    print(f"La cadena '{cadena}' no es válida para la expresión regular.")
+            
+        elif opt == '7':
             print('¡Hasta luego!')
             exit(1)
