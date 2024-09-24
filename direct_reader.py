@@ -1,4 +1,4 @@
-from tokens import Token, TokenType
+from .tokens import Token, TokenType
 
 LETTERS = 'abcdefghijklmnopqrstuvwxyz01234567890.'
 
