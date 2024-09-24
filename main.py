@@ -6,143 +6,143 @@ from direct_dfa import DDFA
 from direct_reader import DirectReader
 from time import process_time
 
-program_title = '''
+titulo_programa = '''
 
-#        FINITE AUTOMATA        #
+#        AUTOMATAS FINITOS        #
 
-Generate NFA's of DFA's based on a regular epression and compare times simulating a string! NOTE: for epsilon expression, please use the letter "e"
+Genera NFA's o DFA's basados en una expresión regular y compara tiempos simulando una cadena! NOTA: para la expresión epsilon, por favor usa la letra "e"
 '''
 
-main_menu = '''
-What would you like to do?
-1. Set a regular expression
-2. Test a string with the given regular expression
-0. Exit out of the program
+menu_principal = '''
+¿Qué te gustaría hacer?
+1. Establecer una expresión regular
+2. Probar una cadena con la expresión regular dada
+0. Salir del programa
 '''
 
 submenu = '''
-Select one of the above to test your regular expression:
+Selecciona una de las opciones para probar tu expresión regular:
 
-    1. Use Thompson to generate an NFA and Powerset construction to generate an DFA.
-    2. Use direct DFA method.
-    0. Back to main menu.
+    1. Usar Thompson para generar un NFA y construcción de conjunto de potencias para generar un DFA.
+    2. Usar el método de DFA directo.
+    0. Volver al menú principal.
 '''
-thompson_msg = '''
-    # THOMPSON AND POWERSET CONSTRUCION # '''
-direct_dfa_msg = '''
-    # DIRECT DFA CONSTRUCION # '''
-invalid_opt = '''
-Err: That's not a valid option!
+mensaje_thompson = '''
+    # THOMPSON Y CONSTRUCCIÓN DE CONJUNTO DE POTENCIAS # '''
+mensaje_dfa_directo = '''
+    # CONSTRUCCIÓN DE DFA DIRECTO # '''
+opcion_invalida = '''
+Err: ¡Esa no es una opción válida!
 '''
-generate_diagram_msg = '''
-Would you like to generate and view the diagram? [y/n] (default: n)'''
-type_regex_msg = '''
-Type in a regular expression '''
-type_string_msg = '''
-Type in a string '''
+mensaje_generar_diagrama = '''
+¿Te gustaría generar y ver el diagrama? [y/n] (por defecto: n)'''
+mensaje_tipo_regex = '''
+Escribe una expresión regular '''
+mensaje_tipo_cadena = '''
+Escribe una cadena '''
 
 if __name__ == "__main__":
-    print(program_title)
+    print(titulo_programa)
     opt = None
     regex = None
-    method = None
+    metodo = None
 
     while opt != 0:
-        print(main_menu)
+        print(menu_principal)
         opt = input('> ')
 
         if opt == '1':
-            print(type_regex_msg)
+            print(mensaje_tipo_regex)
             regex = input('> ')
 
             try:
                 reader = Reader(regex)
                 tokens = reader.CreateTokens()
                 parser = Parser(tokens)
-                tree = parser.Parse()
+                arbol = parser.Parse()
 
                 direct_reader = DirectReader(regex)
                 direct_tokens = direct_reader.CreateTokens()
                 direct_parser = Parser(direct_tokens)
-                direct_tree = direct_parser.Parse()
-                print('\n\tExpression accepted!')
-                print('\tParsed tree:', tree)
+                direct_arbol = direct_parser.Parse()
+                print('\n\t¡Expresión aceptada!')
+                print('\tÁrbol parseado:', arbol)
 
             except AttributeError as e:
-                print(f'\n\tERR: Invalid expression (missing parenthesis)')
+                print(f'\n\tERR: Expresión inválida (falta paréntesis)')
 
             except Exception as e:
                 print(f'\n\tERR: {e}')
 
         if opt == '2':
             if not regex:
-                print('\n\tERR: You need to set a regular expression first!')
+                print('\n\tERR: ¡Necesitas establecer una expresión regular primero!')
                 opt = None
             else:
                 print(submenu)
-                method = input('> ')
+                metodo = input('> ')
 
-                if method == '1':
-                    print(thompson_msg)
-                    print(type_string_msg)
-                    regex_input = input('> ')
+                if metodo == '1':
+                    print(mensaje_thompson)
+                    print(mensaje_tipo_cadena)
+                    entrada_regex = input('> ')
 
-                    nfa = NFA(tree, reader.GetSymbols(), regex_input)
-                    start_time = process_time()
+                    nfa = NFA(arbol, reader.GetSymbols(), entrada_regex)
+                    tiempo_inicio = process_time()
                     nfa_regex = nfa.EvalRegex()
-                    stop_time = process_time()
+                    tiempo_fin = process_time()
 
-                    print('\nTime to evaluate: {:.5E} seconds'.format(
-                        stop_time - start_time))
-                    print('Does the string belongs to the regex (NFA)?')
+                    print('\nTiempo para evaluar: {:.5E} segundos'.format(
+                        tiempo_fin - tiempo_inicio))
+                    print('¿Pertenece la cadena a la expresión regular (NFA)?')
                     print('>', nfa_regex)
 
                     dfa = DFA(nfa.trans_func, nfa.symbols,
-                              nfa.curr_state, nfa.accepting_states, regex_input)
+                              nfa.curr_state, nfa.accepting_states, entrada_regex)
                     dfa.TransformNFAToDFA()
-                    start_time = process_time()
+                    tiempo_inicio = process_time()
                     dfa_regex = dfa.EvalRegex()
-                    stop_time = process_time()
-                    print('\nTime to evaluate: {:.5E} seconds'.format(
-                        stop_time - start_time))
-                    print('Does the string belongs to the regex (DFA)?')
+                    tiempo_fin = process_time()
+                    print('\nTiempo para evaluar: {:.5E} segundos'.format(
+                        tiempo_fin - tiempo_inicio))
+                    print('¿Pertenece la cadena a la expresión regular (DFA)?')
                     print('>', dfa_regex)
 
-                    print(generate_diagram_msg)
-                    generate_diagram = input('> ')
+                    print(mensaje_generar_diagrama)
+                    generar_diagrama = input('> ')
 
-                    if generate_diagram == 'y':
+                    if generar_diagrama == 'y':
                         nfa.WriteNFADiagram()
                         dfa.GraphDFA()
 
-                elif method == '2':
-                    print(direct_dfa_msg)
-                    print(type_string_msg)
-                    regex_input = input('> ')
+                elif metodo == '2':
+                    print(mensaje_dfa_directo)
+                    print(mensaje_tipo_cadena)
+                    entrada_regex = input('> ')
                     ddfa = DDFA(
-                        direct_tree, direct_reader.GetSymbols(), regex_input)
-                    start_time = process_time()
+                        direct_arbol, direct_reader.GetSymbols(), entrada_regex)
+                    tiempo_inicio = process_time()
                     ddfa_regex = ddfa.EvalRegex()
-                    stop_time = process_time()
-                    print('\nTime to evaluate: {:.5E} seconds'.format(
-                        stop_time - start_time))
-                    print('Does the string belongs to the regex?')
+                    tiempo_fin = process_time()
+                    print('\nTiempo para evaluar: {:.5E} segundos'.format(
+                        tiempo_fin - tiempo_inicio))
+                    print('¿Pertenece la cadena a la expresión regular?')
                     print('>', ddfa_regex)
 
-                    print(generate_diagram_msg)
-                    generate_diagram = input('> ')
+                    print(mensaje_generar_diagrama)
+                    generar_diagrama = input('> ')
 
-                    if generate_diagram == 'y':
+                    if generar_diagrama == 'y':
                         ddfa.GraphDFA()
 
                     ddfa = None
 
-                elif method == '3':
+                elif metodo == '3':
                     continue
 
                 else:
-                    print(invalid_opt)
+                    print(opcion_invalida)
 
         elif opt == '0':
-            print('See you later!')
+            print('¡Hasta luego!')
             exit(1)
