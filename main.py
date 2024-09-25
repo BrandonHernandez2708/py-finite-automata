@@ -31,21 +31,14 @@ Genera NFA's o DFA's basados en una expresión regular y compara tiempos simulan
 menu_principal = '''
 ¿Qué te gustaría hacer?
 1. Establecer una expresión regular
-2. Generar  AFN
-3. Conversion AFD 
-4.Validacion de cadenas 
-5.Mostrar Gramatica
-6. Guardar 
+2. Generar AFN usando Thompson y construcción de conjunto de potencias para generar un DFA
+3. Usar el método de DFA directo
+4. Validación de cadenas
+5. Mostrar Gramatica
+6. Guardar
 7. Salir del programa
 '''
 
-submenu = '''
-Selecciona una de las opciones para probar tu expresión regular:
-
-    1. Usar Thompson para generar un NFA y construcción de conjunto de potencias para generar un DFA.
-    2. Usar el método de DFA directo.
-    0. Volver al menú principal.
-'''
 mensaje_thompson = '''
     # THOMPSON Y CONSTRUCCIÓN DE CONJUNTO DE POTENCIAS # '''
 mensaje_dfa_directo = '''
@@ -99,70 +92,63 @@ if __name__ == "__main__":
                 print('\n\tERR: ¡Necesitas establecer una expresión regular primero!')
                 opt = None
             else:
-                print(submenu)
-                metodo = input('> ')
+                print(mensaje_thompson)
+                print(mensaje_tipo_cadena)
+                entrada_regex = input('> ')
 
-                if metodo == '1':
-                    print(mensaje_thompson)
-                    print(mensaje_tipo_cadena)
-                    entrada_regex = input('> ')
+                nfa = NFA(arbol, reader.GetSymbols(), entrada_regex)
+                tiempo_inicio = process_time()
+                nfa_regex = nfa.EvalRegex()
+                tiempo_fin = process_time()
 
-                    nfa = NFA(arbol, reader.GetSymbols(), entrada_regex)
-                    tiempo_inicio = process_time()
-                    nfa_regex = nfa.EvalRegex()
-                    tiempo_fin = process_time()
+                print('\nTiempo para evaluar: {:.5E} segundos'.format(
+                    tiempo_fin - tiempo_inicio))
+                print('¿Pertenece la cadena a la expresión regular (NFA)?')
+                print('>', nfa_regex)
 
-                    print('\nTiempo para evaluar: {:.5E} segundos'.format(
-                        tiempo_fin - tiempo_inicio))
-                    print('¿Pertenece la cadena a la expresión regular (NFA)?')
-                    print('>', nfa_regex)
+                dfa = DFA(nfa.trans_func, nfa.symbols,
+                          nfa.curr_state, nfa.accepting_states, entrada_regex)
+                dfa.TransformNFAToDFA()
+                tiempo_inicio = process_time()
+                dfa_regex = dfa.EvalRegex()
+                tiempo_fin = process_time()
+                print('\nTiempo para evaluar: {:.5E} segundos'.format(
+                    tiempo_fin - tiempo_inicio))
+                print('¿Pertenece la cadena a la expresión regular (DFA)?')
+                print('>', dfa_regex)
 
-                    dfa = DFA(nfa.trans_func, nfa.symbols,
-                              nfa.curr_state, nfa.accepting_states, entrada_regex)
-                    dfa.TransformNFAToDFA()
-                    tiempo_inicio = process_time()
-                    dfa_regex = dfa.EvalRegex()
-                    tiempo_fin = process_time()
-                    print('\nTiempo para evaluar: {:.5E} segundos'.format(
-                        tiempo_fin - tiempo_inicio))
-                    print('¿Pertenece la cadena a la expresión regular (DFA)?')
-                    print('>', dfa_regex)
+                print(mensaje_generar_diagrama)
+                generar_diagrama = input('> ')
 
-                    print(mensaje_generar_diagrama)
-                    generar_diagrama = input('> ')
+                if generar_diagrama == 'y':
+                    nfa.WriteNFADiagram()
+                    dfa.GraphDFA()
 
-                    if generar_diagrama == 'y':
-                        nfa.WriteNFADiagram()
-                        dfa.GraphDFA()
+        elif opt == '3':
+            if not regex:
+                print('\n\tERR: ¡Necesitas establecer una expresión regular primero!')
+                opt = None
+            else:
+                print(mensaje_dfa_directo)
+                print(mensaje_tipo_cadena)
+                entrada_regex = input('> ')
+                ddfa = DDFA(
+                    direct_arbol, direct_reader.GetSymbols(), entrada_regex)
+                tiempo_inicio = process_time()
+                ddfa_regex = ddfa.EvalRegex()
+                tiempo_fin = process_time()
+                print('\nTiempo para evaluar: {:.5E} segundos'.format(
+                    tiempo_fin - tiempo_inicio))
+                print('¿Pertenece la cadena a la expresión regular?')
+                print('>', ddfa_regex)
 
-                elif metodo == '2':
-                    print(mensaje_dfa_directo)
-                    print(mensaje_tipo_cadena)
-                    entrada_regex = input('> ')
-                    ddfa = DDFA(
-                        direct_arbol, direct_reader.GetSymbols(), entrada_regex)
-                    tiempo_inicio = process_time()
-                    ddfa_regex = ddfa.EvalRegex()
-                    tiempo_fin = process_time()
-                    print('\nTiempo para evaluar: {:.5E} segundos'.format(
-                        tiempo_fin - tiempo_inicio))
-                    print('¿Pertenece la cadena a la expresión regular?')
-                    print('>', ddfa_regex)
+                print(mensaje_generar_diagrama)
+                generar_diagrama = input('> ')
 
-                    print(mensaje_generar_diagrama)
-                    generar_diagrama = input('> ')
+                if generar_diagrama == 'y':
+                    ddfa.GraphDFA()
 
-                    if generar_diagrama == 'y':
-                        ddfa.GraphDFA()
-
-                    ddfa = None
-
-                if metodo == '4':
-
-                    continue
-
-                else:
-                    print(opcion_invalida)
+                ddfa = None
 
         elif opt == '4':
             if regex is None:
