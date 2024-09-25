@@ -157,6 +157,13 @@ if __name__ == "__main__":
                     print(f"La cadena '{cadena}' es válida para la expresión regular.")
                 else:
                     print(f"La cadena '{cadena}' no es válida para la expresión regular.")
+        elif opt == '6':
+            print('Guardando...')
+            print("La expresion regular es: expresiones_regulares.txt\n") 
+            print("El Automata Finito no determinista se ha guardado en: output/NFA.gv.pdf\n")
+            print("El Automata Finito determinista se ha guardado en: output/DirectDFA.gv.pdf\n")
+            print("La gramatica se ha guardado en: output/NFA.gv\n")
+
         elif opt == '5':
             gramatica = open('./output/nfa.gv', 'r')
             print(gramatica.read())
