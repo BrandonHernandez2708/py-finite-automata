@@ -122,7 +122,7 @@ if __name__ == "__main__":
 
                 if generar_diagrama == 'y':
                     nfa.WriteNFADiagram()
-                    dfa.GraphDFA()
+                    
 
         elif opt == '3':
             if not regex:
