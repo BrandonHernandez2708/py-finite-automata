@@ -157,6 +157,9 @@ if __name__ == "__main__":
                     print(f"La cadena '{cadena}' es válida para la expresión regular.")
                 else:
                     print(f"La cadena '{cadena}' no es válida para la expresión regular.")
+        elif opt == '5':
+            gramatica = open('./output/nfa.gv', 'r')
+            print(gramatica.read())
             
         elif opt == '7':
             print('¡Hasta luego!')
