@@ -25,14 +25,14 @@ titulo_programa = '''
 
 #        AUTOMATAS FINITOS        #
 
-Genera NFA's o DFA's basados en una expresión regular y compara tiempos simulando una cadena! NOTA: para la expresión epsilon, por favor usa la letra "e"
+    Proyecto segundo parcial de automatas y lenguajes formales 
 '''
 
 menu_principal = '''
 ¿Qué te gustaría hacer?
 1. Establecer una expresión regular
-2. Generar AFN usando Thompson y construcción de conjunto de potencias para generar un DFA
-3. Usar el método de DFA directo
+2. Generar AFN 
+3. Generar AFD
 4. Validación de cadenas
 5. Mostrar Gramatica
 6. Guardar
@@ -40,9 +40,10 @@ menu_principal = '''
 '''
 
 mensaje_thompson = '''
-    # THOMPSON Y CONSTRUCCIÓN DE CONJUNTO DE POTENCIAS # '''
+    Generacion de NFA
+    '''
 mensaje_dfa_directo = '''
-    # CONSTRUCCIÓN DE DFA DIRECTO # '''
+    # CONSTRUCCIÓN DE DFA  # '''
 opcion_invalida = '''
 Err: ¡Esa no es una opción válida!
 '''
@@ -105,18 +106,7 @@ if __name__ == "__main__":
                     tiempo_fin - tiempo_inicio))
                 print('¿Pertenece la cadena a la expresión regular (NFA)?')
                 print('>', nfa_regex)
-
-                dfa = DFA(nfa.trans_func, nfa.symbols,
-                          nfa.curr_state, nfa.accepting_states, entrada_regex)
-                dfa.TransformNFAToDFA()
-                tiempo_inicio = process_time()
-                dfa_regex = dfa.EvalRegex()
-                tiempo_fin = process_time()
-                print('\nTiempo para evaluar: {:.5E} segundos'.format(
-                    tiempo_fin - tiempo_inicio))
-                print('¿Pertenece la cadena a la expresión regular (DFA)?')
-                print('>', dfa_regex)
-
+               
                 print(mensaje_generar_diagrama)
                 generar_diagrama = input('> ')
 
